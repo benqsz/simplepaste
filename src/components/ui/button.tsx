@@ -53,6 +53,9 @@ function Button({
 }: Props) {
   const Comp = asChild ? Slot.Root : 'button'
 
+  if (size?.startsWith('icon') && props['aria-label'] === undefined)
+    throw new Error('Icon buttons must have aria-label for accessibility')
+
   return (
     <Comp
       data-slot="button"

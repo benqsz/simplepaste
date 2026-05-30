@@ -4,6 +4,9 @@ import type { Metadata } from 'next'
 import { JetBrains_Mono } from 'next/font/google'
 
 import { cn } from '@/lib/utils'
+import { Footer } from '@/components/footer'
+import { Header } from '@/components/header'
+import { Providers } from '@/components/providers'
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
@@ -16,8 +19,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={cn('font-mono', jetbrainsMono.variable)}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={cn('font-mono', jetbrainsMono.variable)}
+      suppressHydrationWarning
+    >
+      <body>
+        <Providers>
+          <Header />
+          {children}
+          <Footer />
+        </Providers>
+      </body>
     </html>
   )
 }
