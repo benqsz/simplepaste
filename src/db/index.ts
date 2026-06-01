@@ -1,6 +1,7 @@
-import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import 'dotenv/config'
 
-export const notes = sqliteTable('notes', {
-  id: int().primaryKey(),
-  content: text().notNull(),
-})
+import { drizzle } from 'drizzle-orm/libsql'
+
+import * as schema from './schema'
+
+export const db = drizzle(process.env.DB_FILE_NAME!, { schema })

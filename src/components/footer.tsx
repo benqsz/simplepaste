@@ -7,9 +7,7 @@ export function Footer() {
     <footer className="border-t w-full">
       <Container className="flex flex-col items-center gap-4">
         <ThemeButton />
-        <Typography variant="muted" className="text-center">
-          simplepaste
-        </Typography>
+        <Typography variant="muted">simplepaste</Typography>
       </Container>
     </footer>
   )
