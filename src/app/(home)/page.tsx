@@ -2,8 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { MAX_URL_LENGTH } from '@/lib/constants'
@@ -23,26 +23,39 @@ import { Textarea } from '@/components/ui/textarea'
 import { createNote } from '@/actions/createNote'
 
 const formSchema = z.object({
+  content: z.string().min(1),
   customUrl: z.string().max(MAX_URL_LENGTH).optional(),
 })
 
 export default function Home() {
-  const [text, setText] = useState('')
   const router = useRouter()
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      content: '',
       customUrl: '',
     },
+    mode: 'onChange',
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const content = form.watch('content')
+  const customUrl = form.watch('customUrl')
+
   const onCreate = async () => {
-    const { customUrl } = form.getValues()
-    const note = await createNote({
-      content: text,
+    console.log(content, customUrl)
+    const res = await createNote({
+      content,
       customUrl,
     })
+
+    if (!res.success) {
+      toast.error(res.error)
+      return
+    }
+
+    const note = res.data
     router.push(`/${note.customUrl || note.id}`)
   }
 
@@ -57,13 +70,12 @@ export default function Home() {
         </TabsList>
         <TabsContent value="edit">
           <Textarea
-            className="w-full h-200"
-            value={text}
-            onChange={e => setText(e.target.value)}
+            className="w-full min-h-200"
+            {...form.register('content')}
           />
         </TabsContent>
         <TabsContent value="preview">
-          <Md content={text} />
+          <Md content={content} className="min-h-200" />
         </TabsContent>
         <TabsContent value="options">
           <FieldSet>
@@ -72,7 +84,7 @@ export default function Home() {
                 name="customUrl"
                 control={form.control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
+                  <Field data-invalid={fieldState.invalid} className="max-w-sm">
                     <FieldLabel htmlFor={field.name}>Custom URL</FieldLabel>
                     <Input
                       {...field}

@@ -9,10 +9,40 @@ type Props = {
 }
 
 export const createNote = async ({ content, customUrl }: Props) => {
-  const [note] = await db
-    .insert(notes)
-    .values({ content, customUrl })
-    .returning({ id: notes.id, customUrl: notes.customUrl })
+  if (!content) {
+    return {
+      success: false as const,
+      error: 'Content of note cannot be empty',
+    }
+  }
 
-  return note
+  if (customUrl) {
+    const isUrlExists = await db.query.notes.findFirst({
+      where: (notes, { eq }) => eq(notes.customUrl, customUrl),
+    })
+
+    if (isUrlExists?.id)
+      return {
+        success: false as const,
+        error: 'Custom URL already exists',
+      }
+  }
+
+  try {
+    const [note] = await db
+      .insert(notes)
+      .values({ content, customUrl: customUrl?.trim() || null })
+      .returning({ id: notes.id, customUrl: notes.customUrl })
+
+    return {
+      success: true as const,
+      data: note,
+    }
+  } catch (error) {
+    console.error(error)
+    return {
+      success: false as const,
+      error: 'Unknown error occurred',
+    }
+  }
 }

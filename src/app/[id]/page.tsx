@@ -19,8 +19,8 @@ export default async function NotePage({ params }: PageProps<'/[id]'>) {
   if (!note) notFound()
 
   return (
-    <Container className="flex flex-col gap-4">
-      <Md content={note.content} />
+    <Container className="flex flex-col gap-4 h-screen-header">
+      <Md content={note.content} className="grow" />
     </Container>
   )
 }

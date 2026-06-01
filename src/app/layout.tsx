@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import { JetBrains_Mono } from 'next/font/google'
 
 import { cn } from '@/lib/utils'
-import { Footer } from '@/components/footer'
+import { Header } from '@/components/header'
 import { Providers } from '@/components/providers'
 
 const jetbrainsMono = JetBrains_Mono({
@@ -25,8 +25,8 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
     >
       <body>
         <Providers>
-          {children}
-          <Footer />
+          <Header />
+          <main>{children}</main>
         </Providers>
       </body>
     </html>

@@ -230,3 +230,7 @@ body {
     display: none;
   }
 }
+
+@utility h-screen-header {
+  min-height: calc(100vh - 48px);
+}
