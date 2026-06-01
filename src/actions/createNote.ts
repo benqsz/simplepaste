@@ -1,5 +1,8 @@
 'use server'
 
+import { sanitize } from 'isomorphic-dompurify'
+import slugify from 'slugify'
+
 import { db } from '@/db'
 import { notes } from '@/db/schema'
 
@@ -16,9 +19,19 @@ export const createNote = async ({ content, customUrl }: Props) => {
     }
   }
 
-  if (customUrl) {
+  const cleanUrl = customUrl
+    ? slugify(customUrl, {
+        lower: true,
+        strict: true,
+        trim: true,
+      })
+    : null
+
+  const cleanContent = sanitize(content)
+
+  if (cleanUrl) {
     const isUrlExists = await db.query.notes.findFirst({
-      where: (notes, { eq }) => eq(notes.customUrl, customUrl),
+      where: (notes, { eq }) => eq(notes.customUrl, cleanUrl),
     })
 
     if (isUrlExists?.id)
@@ -31,7 +44,7 @@ export const createNote = async ({ content, customUrl }: Props) => {
   try {
     const [note] = await db
       .insert(notes)
-      .values({ content, customUrl: customUrl?.trim() || null })
+      .values({ content: cleanContent, customUrl: cleanUrl })
       .returning({ id: notes.id, customUrl: notes.customUrl })
 
     return {
