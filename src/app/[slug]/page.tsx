@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { Container } from '@/components/ui/container'
 import { Md } from '@/components/ui/md'
 import { Typography } from '@/components/ui/typography'
+import { deleteNote } from '@/actions/deleteNote'
 import { findNote } from '@/actions/findNote'
 import { getNotes } from '@/actions/getNotes'
 import { incrementViews } from '@/actions/incrementViews'
@@ -22,8 +23,16 @@ export default async function NotePage({ params }: PageProps<'/[slug]'>) {
   if (!note) {
     notFound()
   }
+
   if (note.showViews) {
     await incrementViews(note.id)
+  }
+
+  if (note.deleteAfterViews) {
+    if (note.deleteAfterViews <= note.views) {
+      await deleteNote(note.id)
+      notFound()
+    }
   }
 
   return (
@@ -31,7 +40,7 @@ export default async function NotePage({ params }: PageProps<'/[slug]'>) {
       <Md content={note.content} className="grow" />
       <div className="flex justify-between flex-wrap gap-4">
         {note.showViews && (
-          <Typography variant="small">Views: {note.views}</Typography>
+          <Typography variant="small">Views: {note.views + 1}</Typography>
         )}
         {note.showCreatedAt && (
           <Typography variant="small">

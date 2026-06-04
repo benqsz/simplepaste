@@ -9,6 +9,7 @@ export const notes = sqliteTable('notes', {
   showViews: integer({ mode: 'boolean' }).default(true).notNull(),
   views: integer().default(0).notNull(),
   showCreatedAt: integer({ mode: 'boolean' }).default(true).notNull(),
+  deleteAfterViews: integer(),
   createdAt: integer({ mode: 'timestamp' })
     .$defaultFn(() => new Date())
     .notNull(),

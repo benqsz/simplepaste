@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -25,9 +26,24 @@ import { createNote } from '@/actions/createNote'
 
 const formSchema = z.object({
   content: z.string().min(1, 'Content cannot be empty'),
-  customUrl: z.string().max(MAX_URL_LENGTH).optional(),
+  customUrl: z
+    .string()
+    .max(MAX_URL_LENGTH)
+    .regex(
+      /^[\w-]+$/,
+      'Only letters, numbers, hyphens, and underscores allowed',
+    )
+    .or(z.literal(''))
+    .transform(v => (v === '' ? undefined : v))
+    .optional(),
   showCreatedAt: z.boolean(),
   showViews: z.boolean(),
+  deleteAfterViews: z.coerce
+    .number()
+    .int()
+    .or(z.literal(''))
+    .transform(v => (v === '' ? undefined : v))
+    .optional(),
 })
 
 export default function Home() {
@@ -40,6 +56,7 @@ export default function Home() {
       customUrl: '',
       showCreatedAt: true,
       showViews: true,
+      deleteAfterViews: '',
     },
   })
 
@@ -154,6 +171,26 @@ export default function Home() {
                     <FieldLabel htmlFor={field.name}>
                       Show views count
                     </FieldLabel>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="deleteAfterViews"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="max-w-sm">
+                    <FieldLabel htmlFor={field.name}>
+                      Delete after X views:
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      value={field.value == null ? '' : String(field.value)}
+                      id={field.name}
+                      aria-invalid={fieldState.invalid}
+                    />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}

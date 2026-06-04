@@ -12,10 +12,12 @@ type Props = {
   customUrl?: string
   showViews: boolean
   showCreatedAt: boolean
+  deleteAfterViews?: number
 }
 
 export const createNote = async (props: Props) => {
-  const { content, customUrl, showCreatedAt, showViews } = props
+  const { content, customUrl, showCreatedAt, showViews, deleteAfterViews } =
+    props
 
   if (!content) {
     return {
@@ -31,6 +33,13 @@ export const createNote = async (props: Props) => {
         trim: true,
       })
     : nanoid(12)
+
+  if (slug === '') {
+    return {
+      success: false as const,
+      error: 'Slug cannot be empty',
+    }
+  }
 
   const isUrlExists = await db.query.notes.findFirst({
     where: (notes, { eq }) => eq(notes.slug, slug),
@@ -52,6 +61,7 @@ export const createNote = async (props: Props) => {
         slug,
         showViews,
         showCreatedAt,
+        deleteAfterViews: deleteAfterViews || null,
       })
       .returning({ id: notes.id, slug: notes.slug })
 
