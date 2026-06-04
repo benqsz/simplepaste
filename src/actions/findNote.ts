@@ -2,8 +2,8 @@ import 'server-only'
 
 import { db } from '@/db'
 
-export const findNote = async (id: string) => {
+export const findNote = async (slug: string) => {
   return db.query.notes.findFirst({
-    where: (notes, { eq, or }) => or(eq(notes.id, id), eq(notes.customUrl, id)),
+    where: (notes, { eq }) => eq(notes.slug, slug),
   })
 }

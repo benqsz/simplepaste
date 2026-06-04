@@ -8,6 +8,7 @@ import { z } from 'zod'
 
 import { MAX_URL_LENGTH } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Container } from '@/components/ui/container'
 import {
   Field,
@@ -23,8 +24,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { createNote } from '@/actions/createNote'
 
 const formSchema = z.object({
-  content: z.string().min(1),
+  content: z.string().min(1, 'Content cannot be empty'),
   customUrl: z.string().max(MAX_URL_LENGTH).optional(),
+  showCreatedAt: z.boolean(),
+  showViews: z.boolean(),
 })
 
 export default function Home() {
@@ -35,19 +38,17 @@ export default function Home() {
     defaultValues: {
       content: '',
       customUrl: '',
+      showCreatedAt: true,
+      showViews: true,
     },
-    mode: 'onChange',
   })
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const content = form.watch('content')
-  const customUrl = form.watch('customUrl')
 
-  const onCreate = async () => {
-    console.log(content, customUrl)
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     const res = await createNote({
-      content,
-      customUrl,
+      ...data,
     })
 
     if (!res.success) {
@@ -55,8 +56,7 @@ export default function Home() {
       return
     }
 
-    const note = res.data
-    router.push(`/${note.customUrl || note.id}`)
+    router.push(`/${res.data}`)
   }
 
   return (
@@ -66,12 +66,25 @@ export default function Home() {
           <TabsTrigger value="edit">Edit</TabsTrigger>
           <TabsTrigger value="preview">Preview</TabsTrigger>
           <TabsTrigger value="options">Options</TabsTrigger>
-          <Button onClick={onCreate}>Create</Button>
+          <Button onClick={form.handleSubmit(onSubmit)}>Create</Button>
         </TabsList>
         <TabsContent value="edit">
-          <Textarea
-            className="w-full min-h-200"
-            {...form.register('content')}
+          <Controller
+            name="content"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <>
+                <Textarea
+                  {...field}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                  className="w-full min-h-200"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </>
+            )}
           />
         </TabsContent>
         <TabsContent value="preview">
@@ -93,6 +106,54 @@ export default function Home() {
                       max={MAX_URL_LENGTH}
                       placeholder="If not provided will be random"
                     />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="showCreatedAt"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    orientation="horizontal"
+                  >
+                    <Checkbox
+                      id={field.name}
+                      name={field.name}
+                      aria-invalid={fieldState.invalid}
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <FieldLabel htmlFor={field.name}>
+                      Show created at timestamp
+                    </FieldLabel>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="showViews"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    orientation="horizontal"
+                  >
+                    <Checkbox
+                      id={field.name}
+                      name={field.name}
+                      aria-invalid={fieldState.invalid}
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <FieldLabel htmlFor={field.name}>
+                      Show views count
+                    </FieldLabel>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}

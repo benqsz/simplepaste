@@ -1,6 +1,7 @@
 'use server'
 
 import { sanitize } from 'isomorphic-dompurify'
+import { nanoid } from 'nanoid'
 import slugify from 'slugify'
 
 import { db } from '@/db'
@@ -9,9 +10,13 @@ import { notes } from '@/db/schema'
 type Props = {
   content: string
   customUrl?: string
+  showViews: boolean
+  showCreatedAt: boolean
 }
 
-export const createNote = async ({ content, customUrl }: Props) => {
+export const createNote = async (props: Props) => {
+  const { content, customUrl, showCreatedAt, showViews } = props
+
   if (!content) {
     return {
       success: false as const,
@@ -19,37 +24,40 @@ export const createNote = async ({ content, customUrl }: Props) => {
     }
   }
 
-  const cleanUrl = customUrl
+  const slug = customUrl
     ? slugify(customUrl, {
         lower: true,
         strict: true,
         trim: true,
       })
-    : null
+    : nanoid(12)
+
+  const isUrlExists = await db.query.notes.findFirst({
+    where: (notes, { eq }) => eq(notes.slug, slug),
+  })
+
+  if (isUrlExists?.id)
+    return {
+      success: false as const,
+      error: 'Custom URL already exists',
+    }
 
   const cleanContent = sanitize(content)
-
-  if (cleanUrl) {
-    const isUrlExists = await db.query.notes.findFirst({
-      where: (notes, { eq }) => eq(notes.customUrl, cleanUrl),
-    })
-
-    if (isUrlExists?.id)
-      return {
-        success: false as const,
-        error: 'Custom URL already exists',
-      }
-  }
 
   try {
     const [note] = await db
       .insert(notes)
-      .values({ content: cleanContent, customUrl: cleanUrl })
-      .returning({ id: notes.id, customUrl: notes.customUrl })
+      .values({
+        content: cleanContent,
+        slug,
+        showViews,
+        showCreatedAt,
+      })
+      .returning({ id: notes.id, slug: notes.slug })
 
     return {
       success: true as const,
-      data: note,
+      data: note.slug,
     }
   } catch (error) {
     console.error(error)
