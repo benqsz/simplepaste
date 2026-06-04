@@ -5,18 +5,18 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 
-export function NoteButtons({ content }: { content: string }) {
-  const handleCopy = async () => {
+export function NoteActions({ content }: { content: string }) {
+  const handleCopy = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(content)
+      await navigator.clipboard.writeText(text)
       toast.success('Copied to clipboard')
     } catch {
       toast.error('Failed to copy')
     }
   }
 
-  const handleDownload = () => {
-    const blob = new Blob([content], { type: 'text/markdown' })
+  const handleDownload = (text: string) => {
+    const blob = new Blob([text], { type: 'text/markdown' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -28,7 +28,7 @@ export function NoteButtons({ content }: { content: string }) {
   return (
     <div className="flex gap-2">
       <Button
-        onClick={handleCopy}
+        onClick={() => handleCopy(content)}
         variant="secondary"
         aria-label="copy"
         size="icon"
@@ -36,7 +36,7 @@ export function NoteButtons({ content }: { content: string }) {
         <CopyIcon />
       </Button>
       <Button
-        onClick={handleDownload}
+        onClick={() => handleDownload(content)}
         variant="secondary"
         aria-label="Download"
         size="icon"

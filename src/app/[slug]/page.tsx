@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
 
-import { NoteButtons } from '@/components/noteButtons'
+import { NoteActions } from '@/components/noteActions'
+import { NoteStats } from '@/components/noteStats'
 import { Container } from '@/components/ui/container'
 import { Md } from '@/components/ui/md'
-import { Typography } from '@/components/ui/typography'
 import { deleteNote } from '@/actions/deleteNote'
 import { findNote } from '@/actions/findNote'
 import { incrementViews } from '@/actions/incrementViews'
@@ -31,17 +31,13 @@ export default async function NotePage({ params }: PageProps<'/[slug]'>) {
     <Container className="flex flex-col gap-4">
       <Md content={note.content} />
       <div className="flex gap-2 items-center justify-between">
-        <NoteButtons content={note.content} />
-        <div className="flex gap-2 flex-wrap items-center">
-          {note.showViews && (
-            <Typography variant="small">Views: {note.views + 1}</Typography>
-          )}
-          {note.showCreatedAt && (
-            <Typography variant="small">
-              Created at: {note.createdAt.toLocaleDateString()}
-            </Typography>
-          )}
-        </div>
+        <NoteActions content={note.content} />
+        <NoteStats
+          showViews={note.showViews}
+          views={note.views}
+          showCreatedAt={note.showCreatedAt}
+          createdAt={note.createdAt}
+        />
       </div>
     </Container>
   )

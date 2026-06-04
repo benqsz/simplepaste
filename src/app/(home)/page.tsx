@@ -6,7 +6,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { MAX_URL_LENGTH } from '@/lib/utils'
+import { createNoteSchema, MAX_URL_LENGTH } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Container } from '@/components/ui/container'
@@ -23,33 +23,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { createNote } from '@/actions/createNote'
 
-const formSchema = z.object({
-  content: z.string().min(1, 'Content cannot be empty'),
-  customUrl: z
-    .string()
-    .max(MAX_URL_LENGTH)
-    .regex(
-      /^[\w-]+$/,
-      'Only letters, numbers, hyphens, and underscores allowed',
-    )
-    .or(z.literal(''))
-    .transform(v => (v === '' ? undefined : v))
-    .optional(),
-  showCreatedAt: z.boolean(),
-  showViews: z.boolean(),
-  deleteAfterViews: z.coerce
-    .number()
-    .int()
-    .or(z.literal(''))
-    .transform(v => (v === '' ? undefined : v))
-    .optional(),
-})
-
 export default function Home() {
   const router = useRouter()
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(createNoteSchema),
     defaultValues: {
       content: '',
       customUrl: '',
@@ -62,7 +40,7 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/incompatible-library
   const content = form.watch('content')
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: z.infer<typeof createNoteSchema>) => {
     const res = await createNote({
       ...data,
     })
@@ -76,7 +54,7 @@ export default function Home() {
   }
 
   return (
-    <Container className="flex flex-col gap-4 ">
+    <Container className="flex flex-col gap-4">
       <Tabs defaultValue="edit">
         <TabsList variant="line" className="mx-auto">
           <TabsTrigger value="edit">Edit</TabsTrigger>

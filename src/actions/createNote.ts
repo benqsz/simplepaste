@@ -3,28 +3,22 @@
 import { sanitize } from 'isomorphic-dompurify'
 import { nanoid } from 'nanoid'
 import slugify from 'slugify'
+import { z } from 'zod'
 
+import { createNoteSchema } from '@/lib/utils'
 import { db } from '@/db'
 import { notes } from '@/db/schema'
 
-type Props = {
-  content: string
-  customUrl?: string
-  showViews: boolean
-  showCreatedAt: boolean
-  deleteAfterViews?: number
-}
-
-export const createNote = async (props: Props) => {
-  const { content, customUrl, showCreatedAt, showViews, deleteAfterViews } =
-    props
-
-  if (!content) {
+export const createNote = async (props: z.infer<typeof createNoteSchema>) => {
+  const parsedData = createNoteSchema.safeParse(props)
+  if (!parsedData.success)
     return {
       success: false as const,
-      error: 'Content of note cannot be empty',
+      error: 'Error validating note data',
     }
-  }
+
+  const { content, customUrl, showCreatedAt, showViews, deleteAfterViews } =
+    parsedData.data
 
   const slug = customUrl
     ? slugify(customUrl, {
@@ -33,13 +27,6 @@ export const createNote = async (props: Props) => {
         trim: true,
       })
     : nanoid(12)
-
-  if (slug === '') {
-    return {
-      success: false as const,
-      error: 'Slug cannot be empty',
-    }
-  }
 
   const isUrlExists = await db.query.notes.findFirst({
     where: (notes, { eq }) => eq(notes.slug, slug),
@@ -63,7 +50,7 @@ export const createNote = async (props: Props) => {
         showCreatedAt,
         deleteAfterViews: deleteAfterViews || null,
       })
-      .returning({ id: notes.id, slug: notes.slug })
+      .returning({ slug: notes.slug })
 
     return {
       success: true as const,
