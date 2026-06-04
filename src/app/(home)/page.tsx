@@ -6,7 +6,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { MAX_URL_LENGTH } from '@/lib/constants'
+import { MAX_URL_LENGTH } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Container } from '@/components/ui/container'
@@ -76,9 +76,9 @@ export default function Home() {
   }
 
   return (
-    <Container className="flex flex-col gap-4">
+    <Container className="flex flex-col gap-4 ">
       <Tabs defaultValue="edit">
-        <TabsList variant="line">
+        <TabsList variant="line" className="mx-auto">
           <TabsTrigger value="edit">Edit</TabsTrigger>
           <TabsTrigger value="preview">Preview</TabsTrigger>
           <TabsTrigger value="options">Options</TabsTrigger>
@@ -94,7 +94,7 @@ export default function Home() {
                   {...field}
                   id={field.name}
                   aria-invalid={fieldState.invalid}
-                  className="w-full min-h-200"
+                  className="w-full min-h-[calc(100vh-120px)]"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -104,16 +104,16 @@ export default function Home() {
           />
         </TabsContent>
         <TabsContent value="preview">
-          <Md content={content} className="min-h-200" />
+          <Md content={content} className="min-h-[calc(100vh-120px)]" />
         </TabsContent>
         <TabsContent value="options">
           <FieldSet>
-            <FieldGroup>
+            <FieldGroup className="max-w-sm mx-auto">
               <Controller
                 name="customUrl"
                 control={form.control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid} className="max-w-sm">
+                  <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Custom URL</FieldLabel>
                     <Input
                       {...field}
@@ -180,9 +180,9 @@ export default function Home() {
                 name="deleteAfterViews"
                 control={form.control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid} className="max-w-sm">
+                  <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>
-                      Delete after X views:
+                      Delete after X views
                     </FieldLabel>
                     <Input
                       {...field}

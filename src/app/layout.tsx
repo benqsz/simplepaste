@@ -4,8 +4,8 @@ import type { Metadata } from 'next'
 import { JetBrains_Mono } from 'next/font/google'
 
 import { cn } from '@/lib/utils'
-import { Header } from '@/components/header'
-import { Providers } from '@/components/providers'
+import { Footer } from '@/components/footer'
+import { Toaster } from '@/components/ui/sonner'
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
@@ -24,10 +24,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       suppressHydrationWarning
     >
       <body>
-        <Providers>
-          <Header />
-          <main>{children}</main>
-        </Providers>
+        <main>{children}</main>
+        <Toaster position="top-center" />
+        <Footer />
       </body>
     </html>
   )

@@ -1,20 +1,14 @@
 import { notFound } from 'next/navigation'
 
+import { NoteButtons } from '@/components/noteButtons'
 import { Container } from '@/components/ui/container'
 import { Md } from '@/components/ui/md'
 import { Typography } from '@/components/ui/typography'
 import { deleteNote } from '@/actions/deleteNote'
 import { findNote } from '@/actions/findNote'
-import { getNotes } from '@/actions/getNotes'
 import { incrementViews } from '@/actions/incrementViews'
 
-export async function generateStaticParams() {
-  const notes = await getNotes()
-
-  return notes.map(note => ({
-    slug: note.slug,
-  }))
-}
+export const dynamic = 'force-dynamic'
 
 export default async function NotePage({ params }: PageProps<'/[slug]'>) {
   const { slug } = await params
@@ -24,9 +18,7 @@ export default async function NotePage({ params }: PageProps<'/[slug]'>) {
     notFound()
   }
 
-  if (note.showViews) {
-    await incrementViews(note.id)
-  }
+  await incrementViews(note.id)
 
   if (note.deleteAfterViews) {
     if (note.deleteAfterViews <= note.views) {
@@ -36,17 +28,20 @@ export default async function NotePage({ params }: PageProps<'/[slug]'>) {
   }
 
   return (
-    <Container className="flex flex-col gap-4 h-screen-header">
-      <Md content={note.content} className="grow" />
-      <div className="flex justify-between flex-wrap gap-4">
-        {note.showViews && (
-          <Typography variant="small">Views: {note.views + 1}</Typography>
-        )}
-        {note.showCreatedAt && (
-          <Typography variant="small">
-            Created at: {note.createdAt.toLocaleDateString()}
-          </Typography>
-        )}
+    <Container className="flex flex-col gap-4">
+      <Md content={note.content} />
+      <div className="flex gap-2 items-center justify-between">
+        <NoteButtons content={note.content} />
+        <div className="flex gap-2 flex-wrap items-center">
+          {note.showViews && (
+            <Typography variant="small">Views: {note.views + 1}</Typography>
+          )}
+          {note.showCreatedAt && (
+            <Typography variant="small">
+              Created at: {note.createdAt.toLocaleDateString()}
+            </Typography>
+          )}
+        </div>
       </div>
     </Container>
   )

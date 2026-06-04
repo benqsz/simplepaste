@@ -31,7 +31,7 @@ export function Md({ content, className }: Props) {
   return (
     <div
       className={cn(
-        'prose-neutral prose-sm prose dark:prose-invert border border-input bg-input/20 rounded-sm p-2 min-w-full min-h-full',
+        'prose-neutral prose-sm prose prose-invert border border-input bg-input/20 rounded-sm p-2 min-w-full min-h-full wrap-break-word whitespace-pre-wrap',
         className,
       )}
       dangerouslySetInnerHTML={{ __html: clean }}
